@@ -206,58 +206,27 @@
     // ============================================================
 
     /* ====================================================
-       1. INITIALISATION UI — indépendante de Supabase
+       1. AFFICHAGE CONDITIONNEL — événements natifs
        ==================================================== */
 
     const detailsSection    = document.getElementById('detailsSection');
     const accompagnantField = document.getElementById('accompagnantField');
     const nombreSelect      = document.getElementById('nombre_personnes');
 
-    /* Radio custom avec callback optionnel */
-    function initRadioGroup(groupId, onSelect) {
-      const group = document.getElementById(groupId);
-      if (!group) return;
-      group.querySelectorAll('.radio-option').forEach(opt => {
-        opt.addEventListener('click', (e) => {
-          e.preventDefault();
-          group.querySelectorAll('.radio-option').forEach(o => o.classList.remove('selected'));
-          opt.classList.add('selected');
-          const inp = opt.querySelector('input');
-          inp.checked = true;
-          if (onSelect) onSelect(inp.value);
-        });
+    /* Afficher/masquer la section détails selon présence */
+    document.querySelectorAll('input[name="presence"]').forEach(inp => {
+      inp.addEventListener('change', () => {
+        if (inp.value === 'oui') {
+          detailsSection.classList.remove('hidden');
+          detailsSection.classList.add('visible');
+        } else {
+          detailsSection.classList.remove('visible');
+          detailsSection.classList.add('hidden');
+        }
       });
-    }
-
-    /* Checkbox custom */
-    function initCheckboxGroup(groupId) {
-      const group = document.getElementById(groupId);
-      if (!group) return;
-      group.querySelectorAll('.checkbox-option').forEach(opt => {
-        opt.addEventListener('click', (e) => {
-          e.preventDefault();
-          const inp = opt.querySelector('input');
-          inp.checked = !inp.checked;
-          opt.classList.toggle('selected', inp.checked);
-        });
-      });
-    }
-
-    /* Affichage conditionnel de la section détails */
-    initRadioGroup('presenceGroup', (val) => {
-      if (val === 'oui') {
-        detailsSection.classList.remove('hidden');
-        detailsSection.classList.add('visible');
-      } else {
-        detailsSection.classList.remove('visible');
-        detailsSection.classList.add('hidden');
-      }
     });
 
-    initRadioGroup('hebergementGroup');
-    initCheckboxGroup('momentsGroup');
-
-    /* Affichage du champ accompagnant */
+    /* Afficher/masquer le champ accompagnant */
     nombreSelect.addEventListener('change', () => {
       const n = parseInt(nombreSelect.value);
       if (n >= 2) {
@@ -270,7 +239,7 @@
     });
 
     /* ====================================================
-       2. INITIALISATION SUPABASE — après l'UI
+       2. INITIALISATION SUPABASE
        ==================================================== */
     let supabase = null;
     try {
