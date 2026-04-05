@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Mariage Virginie &amp; Sven</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ══ OVERLAY MOT DE PASSE ══════════════════════════════════════════════ -->
+<div class="password-overlay" id="passwordOverlay">
+  <div class="password-card">
+    <div class="lock-icon">🔒</div>
+    <h2>Accès restreint</h2>
+    <p>Tableau de bord réservé aux organisateurs du mariage.</p>
+    <input type="password" id="passwordInput" placeholder="Mot de passe">
+    <p class="password-error" id="passwordError">&nbsp;</p>
+    <button class="btn-primary" id="passwordBtn" style="margin-top:4px">Accéder</button>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD ══════════════════════════════════════════════════════════ -->
+<div class="dashboard-layout" id="dashboardContent" style="display:none;">
+
+  <header class="dashboard-header">
+    <h1>Dashboard &nbsp;<span>Virginie &amp; Sven</span> &nbsp;·&nbsp; 17 Oct. 2026</h1>
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+      <span class="last-updated" id="lastUpdated">Chargement…</span>
+      <button class="btn-secondary" id="refreshBtn">↻ Actualiser</button>
+      <a href="index.html" class="btn-secondary" style="text-decoration:none;">← Formulaire</a>
+    </div>
+  </header>
+
+  <div class="dashboard-body">
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card gold">
+        <div class="kpi-value" id="kpiTotal">—</div>
+        <div class="kpi-label">Réponses totales</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-value" id="kpiOui">—</div>
+        <div class="kpi-label">Présents confirmés</div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-value" id="kpiNon">—</div>
+        <div class="kpi-label">Déclinés</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value" id="kpiPersonnes">—</div>
+        <div class="kpi-label">Personnes attendues</div>
+      </div>
+    </div>
+
+    <!-- Graphiques -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3>Présence</h3>
+        <div class="chart-container"><canvas id="chartPresence"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Personnes par étape de la journée</h3>
+        <div class="chart-container"><canvas id="chartMoments"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Hébergement</h3>
+        <div class="chart-container"><canvas id="chartHeberg"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Tableau -->
+    <div class="table-card">
+      <div class="table-toolbar">
+        <h3>Liste des invités</h3>
+        <div class="toolbar-actions">
+          <select class="filter-select" id="filterPresence">
+            <option value="all">Tous</option>
+            <option value="oui">Présents</option>
+            <option value="non">Déclinés</option>
+          </select>
+          <select class="filter-select" id="filterMoment">
+            <option value="all">Tous les moments</option>
+            <option value="ceremonie">Cérémonie</option>
+            <option value="cocktail">Cocktail</option>
+            <option value="diner">Dîner</option>
+            <option value="soiree">Soirée dansante</option>
+          </select>
+          <button class="btn-secondary" id="exportCSV">⬇ CSV</button>
+          <button class="btn-secondary" id="exportPDF">⬇ PDF</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Email</th>
+              <th>Téléphone</th>
+              <th>Présence</th>
+              <th>Pers.</th>
+              <th>Moments</th>
+              <th>Hébergement</th>
+              <th>Date réponse</th>
+            </tr>
+          </thead>
+          <tbody id="guestTableBody">
+            <tr><td colspan="8"><div class="empty-table"><div class="icon">⏳</div>Chargement…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- jsPDF pour export PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+<script>
+// ─── Config ──────────────────────────────────────────────────────────────────
+var SUPABASE_URL  = 'https://evgmjelghhatcumtccoz.supabase.co';
+var SUPABASE_ANON = 'sb_publishable_ZyM0wOP4hn61DpK7kwTLgQ_0cmJn-My';
+var PASSWORD      = 'TAO2026';
+
+var MOMENT_LABELS = {
+  ceremonie: 'Cérémonie',
+  cocktail:  'Cocktail',
+  diner:     'Dîner',
+  soiree:    'Soirée dansante'
+};
+
+// ─── Mot de passe ─────────────────────────────────────────────────────────────
+var overlay     = document.getElementById('passwordOverlay');
+var dashContent = document.getElementById('dashboardContent');
+var pwdInput    = document.getElementById('passwordInput');
+var pwdError    = document.getElementById('passwordError');
+var pwdBtn      = document.getElementById('passwordBtn');
+
+function checkPassword() {
+  if (pwdInput.value.trim() === PASSWORD) {
+    overlay.style.display    = 'none';
+    dashContent.style.display = 'block';
+    loadData();
+  } else {
+    pwdError.textContent = 'Mot de passe incorrect.';
+    pwdInput.value = '';
+    pwdInput.focus();
+  }
+}
+
+pwdBtn.addEventListener('click', checkPassword);
+pwdInput.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') checkPassword();
+});
+pwdInput.focus();
+
+// ─── Données ──────────────────────────────────────────────────────────────────
+var allData = [];
+var chartPresenceInst, chartMomentsInst, chartHebergInst;
+
+function loadData() {
+  document.getElementById('lastUpdated').textContent = 'Chargement…';
+
+  fetch(SUPABASE_URL + '/rest/v1/rsvp?select=*&order=created_at.desc', {
+    headers: {
+      'apikey':        SUPABASE_ANON,
+      'Authorization': 'Bearer ' + SUPABASE_ANON,
+      'Content-Type':  'application/json'
+    }
+  })
+  .then(function(res) {
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  })
+  .then(function(data) {
+    allData = data || [];
+    renderAll();
+    document.getElementById('lastUpdated').textContent =
+      'Mis à jour : ' + new Date().toLocaleTimeString('fr-FR');
+  })
+  .catch(function(err) {
+    document.getElementById('lastUpdated').textContent = '⚠ Erreur : ' + err.message;
+    document.getElementById('guestTableBody').innerHTML =
+      '<tr><td colspan="8"><div class="empty-table"><div class="icon">⚠️</div>Impossible de charger les données.<br><small>Vérifiez que la table Supabase existe et que les politiques RLS sont configurées.</small></div></td></tr>';
+  });
+}
+
+function renderAll() {
+  updateKPIs();
+  updateCharts();
+  renderTable();
+}
+
+// ─── KPIs ─────────────────────────────────────────────────────────────────────
+function updateKPIs() {
+  var presents  = allData.filter(function(r) { return r.presence === true; });
+  var declines  = allData.filter(function(r) { return r.presence === false; });
+  var personnes = presents.reduce(function(s, r) { return s + (r.nombre_personnes || 1); }, 0);
+
+  document.getElementById('kpiTotal').textContent    = allData.length;
+  document.getElementById('kpiOui').textContent      = presents.length;
+  document.getElementById('kpiNon').textContent      = declines.length;
+  document.getElementById('kpiPersonnes').textContent = personnes;
+}
+
+// ─── Graphiques ───────────────────────────────────────────────────────────────
+function updateCharts() {
+  var presents  = allData.filter(function(r) { return r.presence === true; });
+  var declines  = allData.filter(function(r) { return r.presence === false; });
+
+  // Chart 1 – Présence
+  if (chartPresenceInst) chartPresenceInst.destroy();
+  chartPresenceInst = new Chart(document.getElementById('chartPresence'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Présents', 'Déclinés'],
+      datasets: [{ data: [presents.length, declines.length],
+        backgroundColor: ['#27AE60', '#E74C3C'], borderWidth: 2, borderColor: '#fff' }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '65%',
+      plugins: { legend: { position: 'bottom' } } }
+  });
+
+  // Chart 2 – Moments
+  var momentCounts = { ceremonie: 0, cocktail: 0, diner: 0, soiree: 0 };
+  presents.forEach(function(r) {
+    if (Array.isArray(r.moments)) {
+      r.moments.forEach(function(m) {
+        if (momentCounts[m] !== undefined) momentCounts[m] += (r.nombre_personnes || 1);
+      });
+    }
+  });
+  if (chartMomentsInst) chartMomentsInst.destroy();
+  chartMomentsInst = new Chart(document.getElementById('chartMoments'), {
+    type: 'bar',
+    data: {
+      labels: ['Cérémonie', 'Cocktail', 'Dîner', 'Soirée dansante'],
+      datasets: [{ label: 'Personnes',
+        data: [momentCounts.ceremonie, momentCounts.cocktail, momentCounts.diner, momentCounts.soiree],
+        backgroundColor: ['#B8860B', '#D4A843', '#C8960C', '#E8B840'], borderRadius: 6 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: { legend: { display: false } },
+      scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } }, y: { grid: { display: false } } } }
+  });
+
+  // Chart 3 – Hébergement
+  var hOui = presents.filter(function(r) { return r.hebergement === true; }).length;
+  var hNon = presents.filter(function(r) { return r.hebergement === false; }).length;
+  if (chartHebergInst) chartHebergInst.destroy();
+  chartHebergInst = new Chart(document.getElementById('chartHeberg'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Oui', 'Non'],
+      datasets: [{ data: [hOui, hNon],
+        backgroundColor: ['#B8860B', '#C8C8C8'], borderWidth: 2, borderColor: '#fff' }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '65%',
+      plugins: { legend: { position: 'bottom' } } }
+  });
+}
+
+// ─── Tableau ──────────────────────────────────────────────────────────────────
+function esc(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function getFiltered() {
+  var pf = document.getElementById('filterPresence').value;
+  var mf = document.getElementById('filterMoment').value;
+  return allData.filter(function(r) {
+    if (pf === 'oui' && r.presence !== true) return false;
+    if (pf === 'non' && r.presence !== false) return false;
+    if (mf !== 'all' && (!Array.isArray(r.moments) || !r.moments.includes(mf))) return false;
+    return true;
+  });
+}
+
+function renderTable() {
+  var data = getFiltered();
+  var tbody = document.getElementById('guestTableBody');
+
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-table"><div class="icon">🕊️</div>Aucune réponse pour le moment.</div></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = data.map(function(r) {
+    var presTag = r.presence
+      ? '<span class="badge oui">Oui</span>'
+      : '<span class="badge non">Non</span>';
+
+    var momentsTags = Array.isArray(r.moments) && r.moments.length
+      ? r.moments.map(function(m) { return '<span class="badge moment">' + esc(MOMENT_LABELS[m] || m) + '</span>'; }).join('')
+      : '—';
+
+    var hebergTag = r.hebergement === true
+      ? '<span class="badge oui">Oui</span>'
+      : r.hebergement === false ? '<span class="badge non">Non</span>' : '—';
+
+    var date = r.created_at
+      ? new Date(r.created_at).toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' })
+      : '—';
+
+    return '<tr>'
+      + '<td><strong>' + esc(r.nom_prenom) + '</strong></td>'
+      + '<td><a href="mailto:' + esc(r.email) + '" style="color:var(--gold);text-decoration:none;">' + esc(r.email) + '</a></td>'
+      + '<td>' + esc(r.telephone) + '</td>'
+      + '<td>' + presTag + '</td>'
+      + '<td style="text-align:center;">' + (r.nombre_personnes || '—') + '</td>'
+      + '<td>' + momentsTags + '</td>'
+      + '<td>' + hebergTag + '</td>'
+      + '<td style="white-space:nowrap;font-size:0.8rem;color:var(--text-light);">' + date + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
+document.getElementById('filterPresence').addEventListener('change', renderTable);
+document.getElementById('filterMoment').addEventListener('change', renderTable);
+document.getElementById('refreshBtn').addEventListener('click', loadData);
+
+// ─── Export CSV ───────────────────────────────────────────────────────────────
+document.getElementById('exportCSV').addEventListener('click', function() {
+  var data = getFiltered();
+  var headers = ['Nom & Prénom','Email','Téléphone','Présence','Nb personnes','Accompagnant','Moments','Hébergement','Message','Date réponse'];
+  var rows = data.map(function(r) {
+    return [
+      r.nom_prenom || '', r.email || '', r.telephone || '',
+      r.presence ? 'Oui' : 'Non',
+      r.nombre_personnes || '',
+      r.nom_accompagnant || '',
+      Array.isArray(r.moments) ? r.moments.map(function(m) { return MOMENT_LABELS[m] || m; }).join(' | ') : '',
+      r.hebergement === true ? 'Oui' : r.hebergement === false ? 'Non' : '',
+      r.message || '',
+      r.created_at ? new Date(r.created_at).toLocaleString('fr-FR') : ''
+    ];
+  });
+  var csv = [headers].concat(rows)
+    .map(function(row) { return row.map(function(c) { return '"' + String(c).replace(/"/g,'""') + '"'; }).join(','); })
+    .join('\n');
+  var blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href = url; a.download = 'invites_' + new Date().toISOString().slice(0,10) + '.csv'; a.click();
+  URL.revokeObjectURL(url);
+});
+
+// ─── Export PDF ───────────────────────────────────────────────────────────────
+document.getElementById('exportPDF').addEventListener('click', function() {
+  if (!window.jspdf) { alert('Librairie PDF non chargée, réessayez.'); return; }
+  var doc = new window.jspdf.jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(18);
+  doc.setTextColor(184,134,11);
+  doc.text('Mariage Virginie & Sven', 14, 18);
+
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(10);
+  doc.setTextColor(100,100,100);
+  doc.text('17 Octobre 2026 — Château Le Passage', 14, 26);
+  doc.text('Liste générée le ' + new Date().toLocaleDateString('fr-FR') + ' à ' + new Date().toLocaleTimeString('fr-FR'), 14, 32);
+
+  var presents  = allData.filter(function(r) { return r.presence === true; });
+  doc.setFontSize(9);
+  doc.setTextColor(60,60,60);
+  doc.text('Total réponses : ' + allData.length + '   |   Présents : ' + presents.length + '   |   Personnes : ' + presents.reduce(function(s,r){return s+(r.nombre_personnes||1);},0), 14, 40);
+
+  doc.setDrawColor(184,134,11); doc.setLineWidth(0.5); doc.line(14,43,283,43);
+
+  doc.autoTable({
+    startY: 48,
+    head: [['Nom & Prénom','Email','Téléphone','Nb pers.','Accompagnant','Moments','Hébergement']],
+    body: presents.map(function(r) {
+      return [
+        r.nom_prenom || '', r.email || '', r.telephone || '',
+        r.nombre_personnes || 1,
+        r.nom_accompagnant || '',
+        Array.isArray(r.moments) ? r.moments.map(function(m){return MOMENT_LABELS[m]||m;}).join(', ') : '',
+        r.hebergement === true ? 'Oui' : r.hebergement === false ? 'Non' : ''
+      ];
+    }),
+    styles: { font:'helvetica', fontSize:8, cellPadding:3 },
+    headStyles: { fillColor:[184,134,11], textColor:255, fontStyle:'bold', fontSize:8 },
+    alternateRowStyles: { fillColor:[253,248,242] },
+    columnStyles: { 0:{cellWidth:42}, 1:{cellWidth:52}, 2:{cellWidth:32}, 3:{cellWidth:16,halign:'center'}, 4:{cellWidth:38}, 5:{cellWidth:62}, 6:{cellWidth:22,halign:'center'} },
+    margin: { left:14, right:14 }
+  });
+
+  doc.save('invites_confirmes_' + new Date().toISOString().slice(0,10) + '.pdf');
+});
+</script>
+
+<style>
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%,75%{transform:translateX(-6px)} 50%{transform:translateX(6px)} }
+.shake { animation: shake 0.4s ease; }
+</style>
+
+</body>
+</html>
