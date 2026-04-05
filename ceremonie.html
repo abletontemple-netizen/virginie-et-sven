@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mariage Virginie &amp; Sven — Confirmation de présence</title>
+  <meta name="description" content="Confirmez votre présence à la cérémonie et au cocktail du mariage de Virginie et Sven.">
+  <!-- Pas d'indexation pour ce formulaire secondaire -->
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="bg-chateau">
+
+<div class="page-wrapper">
+  <div class="card">
+
+    <!-- En-tête -->
+    <header class="wedding-header">
+      <span class="ornament">— vous êtes invité(e) —</span>
+      <h1><em>Virginie</em> &amp; <em>Sven</em></h1>
+      <div class="divider">❧</div>
+      <p class="date-lieu">17 Octobre 2026 &nbsp;·&nbsp; Château Le Passage</p>
+      <p style="margin-top:14px; font-size:0.82rem; color:var(--gold); letter-spacing:0.08em; font-style:italic;">
+        Cérémonie &amp; Cocktail
+      </p>
+    </header>
+
+    <!-- Message de confirmation -->
+    <div id="confirmationMsg" style="display:none; text-align:center; padding:40px 20px;">
+      <div style="font-size:2.5rem; margin-bottom:16px;">✦</div>
+      <h2 style="font-family:'Cormorant Garamond',serif; font-size:1.8rem; font-weight:400; margin-bottom:12px;">Merci pour votre réponse !</h2>
+      <p style="color:var(--text-light); line-height:1.7;">
+        Nous avons bien reçu votre confirmation.<br>
+        Nous avons hâte de partager ce beau moment avec vous.<br><br>
+        <em style="color:var(--gold);">Virginie &amp; Sven</em>
+      </p>
+    </div>
+
+    <!-- Formulaire -->
+    <form id="rsvpForm">
+
+      <div id="errorBanner" style="display:none; background:#FDECEA; border:1px solid #F5C6C2; border-radius:8px; padding:12px 16px; font-size:0.88rem; color:#C0392B; margin-bottom:16px;"></div>
+
+      <!-- 1. Nom et Prénom -->
+      <div class="form-section">
+        <p class="form-section-title">Votre identité</p>
+        <div class="form-group">
+          <label for="nom_prenom">Nom et Prénom <span class="required">*</span></label>
+          <input type="text" id="nom_prenom" placeholder="ex. Martin Dupont" autocomplete="name">
+          <p class="field-error" id="err-nom" style="display:none;">Veuillez indiquer votre nom et prénom.</p>
+        </div>
+      </div>
+
+      <!-- 2. Présence -->
+      <div class="form-section">
+        <p class="form-section-title">Votre présence</p>
+        <div class="form-group">
+          <label>Serez-vous présent(e) le 17 octobre 2026 ? <span class="required">*</span></label>
+          <div class="radio-group inline">
+            <label class="radio-option">
+              <input type="radio" name="presence" value="oui">
+              <span class="radio-dot"></span>
+              <span>Oui, avec grand plaisir ✨</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="presence" value="non">
+              <span class="radio-dot"></span>
+              <span>Non, malheureusement</span>
+            </label>
+          </div>
+          <p class="field-error" id="err-presence" style="display:none;">Veuillez indiquer si vous serez présent(e).</p>
+        </div>
+      </div>
+
+      <!-- 3. Section OUI -->
+      <div id="sectionOui" style="display:none;">
+
+        <div class="form-section">
+          <p class="form-section-title">Vos coordonnées</p>
+          <div class="form-group">
+            <label for="email">Adresse email <span class="required">*</span></label>
+            <input type="email" id="email" placeholder="ex. martin@email.com" autocomplete="email">
+            <p class="field-error" id="err-email" style="display:none;">Veuillez indiquer une adresse email valide.</p>
+          </div>
+          <div class="form-group">
+            <label for="telephone">Numéro de téléphone <span class="required">*</span></label>
+            <input type="tel" id="telephone" placeholder="ex. 06 12 34 56 78" autocomplete="tel">
+            <p class="field-error" id="err-tel" style="display:none;">Veuillez indiquer votre numéro de téléphone.</p>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <p class="form-section-title">Organisation de votre venue</p>
+
+          <div class="form-group">
+            <label for="nombre_personnes">Nombre de personnes (vous inclus) <span class="required">*</span></label>
+            <select id="nombre_personnes">
+              <option value="">— Sélectionnez —</option>
+              <option value="1">1 personne</option>
+              <option value="2">2 personnes</option>
+              <option value="3">3 personnes</option>
+              <option value="4">4 personnes</option>
+            </select>
+            <p class="field-error" id="err-nombre" style="display:none;">Veuillez indiquer le nombre de personnes.</p>
+          </div>
+
+          <div class="form-group" id="accompagnantField" style="display:none;">
+            <label for="nom_accompagnant">Nom de vos accompagnants(es) <span style="font-size:0.75rem; font-weight:300;">(séparés par une virgule)</span></label>
+            <input type="text" id="nom_accompagnant" placeholder="ex. Claire Dupont, Lucas Martin">
+          </div>
+
+          <!-- Moments : uniquement Cérémonie et Cocktail -->
+          <div class="form-group">
+            <label>À quels moments serez-vous présent(e) ? <span class="required">*</span></label>
+            <div class="checkbox-group">
+              <label class="checkbox-option">
+                <input type="checkbox" name="moments" value="ceremonie">
+                <span class="checkbox-box"></span>
+                <span>💒 Cérémonie</span>
+              </label>
+              <label class="checkbox-option">
+                <input type="checkbox" name="moments" value="cocktail">
+                <span class="checkbox-box"></span>
+                <span>🥂 Cocktail</span>
+              </label>
+            </div>
+            <p class="field-error" id="err-moments" style="display:none;">Veuillez sélectionner au moins un moment.</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 4. Section NON — message optionnel -->
+      <div id="sectionNon" style="display:none;">
+        <div class="form-section">
+          <p class="form-section-title">Un mot pour les mariés</p>
+          <div class="form-group">
+            <label for="messageNon">Message personnel <span style="font-size:0.75rem; font-weight:300;">(optionnel)</span></label>
+            <textarea id="messageNon" placeholder="Vous pouvez laisser un petit mot à Virginie et Sven…" rows="4"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" id="submitBtn" class="btn-primary">Envoyer ma réponse</button>
+
+    </form>
+  </div>
+</div>
+
+<script>
+var SUPABASE_URL  = 'https://evgmjelghhatcumtccoz.supabase.co';
+var SUPABASE_ANON = 'sb_publishable_ZyM0wOP4hn61DpK7kwTLgQ_0cmJn-My';
+
+var sectionOui   = document.getElementById('sectionOui');
+var sectionNon   = document.getElementById('sectionNon');
+var accompField  = document.getElementById('accompagnantField');
+var nombreSelect = document.getElementById('nombre_personnes');
+
+/* Présence */
+document.querySelectorAll('input[name="presence"]').forEach(function(inp) {
+  inp.addEventListener('change', function() {
+    if (this.value === 'oui') {
+      sectionOui.style.display = 'block';
+      sectionNon.style.display = 'none';
+    } else {
+      sectionOui.style.display = 'none';
+      sectionNon.style.display = 'block';
+    }
+  });
+});
+
+/* Nombre → accompagnant */
+nombreSelect.addEventListener('change', function() {
+  var n = parseInt(this.value) || 0;
+  accompField.style.display = n >= 2 ? 'block' : 'none';
+});
+
+/* Validation */
+function showErr(id, show) {
+  var el = document.getElementById(id);
+  if (el) el.style.display = show ? 'block' : 'none';
+}
+
+function getMoments() {
+  var res = [];
+  document.querySelectorAll('input[name="moments"]:checked').forEach(function(cb) { res.push(cb.value); });
+  return res;
+}
+
+function validate() {
+  var ok = true;
+  var nom = document.getElementById('nom_prenom').value.trim();
+  showErr('err-nom', !nom);
+  if (!nom) ok = false;
+
+  var presence = document.querySelector('input[name="presence"]:checked');
+  showErr('err-presence', !presence);
+  if (!presence) return false;
+
+  if (presence.value === 'oui') {
+    var email = document.getElementById('email').value.trim();
+    var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    showErr('err-email', !emailOk);
+    if (!emailOk) ok = false;
+
+    var tel = document.getElementById('telephone').value.trim();
+    showErr('err-tel', tel.length < 6);
+    if (tel.length < 6) ok = false;
+
+    var nb = nombreSelect.value;
+    showErr('err-nombre', !nb);
+    if (!nb) ok = false;
+
+    var moments = getMoments();
+    showErr('err-moments', moments.length === 0);
+    if (moments.length === 0) ok = false;
+
+  }
+  return ok;
+}
+
+/* Soumission */
+var submitBtn   = document.getElementById('submitBtn');
+var errorBanner = document.getElementById('errorBanner');
+var confirmMsg  = document.getElementById('confirmationMsg');
+var rsvpForm    = document.getElementById('rsvpForm');
+
+submitBtn.addEventListener('click', function() {
+  errorBanner.style.display = 'none';
+  if (!validate()) return;
+
+  var presence  = document.querySelector('input[name="presence"]:checked').value;
+  var isPresent = presence === 'oui';
+  var nb        = isPresent ? (parseInt(nombreSelect.value) || null) : null;
+  var payload = {
+    nom_prenom:                document.getElementById('nom_prenom').value.trim(),
+    email:                     isPresent ? document.getElementById('email').value.trim().toLowerCase() : null,
+    telephone:                 isPresent ? document.getElementById('telephone').value.trim() : null,
+    presence:                  isPresent,
+    nombre_personnes:          nb,
+    nom_accompagnant:          (isPresent && nb >= 2) ? (document.getElementById('nom_accompagnant').value.trim() || null) : null,
+    moments:                   isPresent ? getMoments() : [],
+    hebergement:               null,
+    hebergement_accompagnants: null,
+    nombre_hebergement:        null,
+    message:                   !isPresent ? (document.getElementById('messageNon').value.trim() || null) : null,
+    formulaire:                'ceremonie-cocktail'
+  };
+
+  submitBtn.disabled    = true;
+  submitBtn.textContent = 'Envoi en cours…';
+
+  fetch(SUPABASE_URL + '/rest/v1/rsvp', {
+    method:  'POST',
+    headers: {
+      'Content-Type':  'application/json',
+      'apikey':        SUPABASE_ANON,
+      'Authorization': 'Bearer ' + SUPABASE_ANON,
+      'Prefer':        'return=minimal'
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(function(res) {
+    if (res.status === 201 || res.status === 200) {
+      rsvpForm.style.display   = 'none';
+      confirmMsg.style.display = 'block';
+    } else {
+      return res.text().then(function(txt) {
+        var msg = 'Une erreur est survenue. Veuillez réessayer.';
+        try {
+          var err = JSON.parse(txt);
+          if (err.code === '23505') msg = 'Cette adresse email a déjà été utilisée pour répondre.';
+        } catch(e) {}
+        errorBanner.textContent   = msg;
+        errorBanner.style.display = 'block';
+        submitBtn.disabled    = false;
+        submitBtn.textContent = 'Envoyer ma réponse';
+      });
+    }
+  })
+  .catch(function() {
+    errorBanner.textContent   = 'Erreur réseau. Vérifiez votre connexion et réessayez.';
+    errorBanner.style.display = 'block';
+    submitBtn.disabled    = false;
+    submitBtn.textContent = 'Envoyer ma réponse';
+  });
+});
+</script>
+</body>
+</html>
