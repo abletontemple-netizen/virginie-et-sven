@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mariage Virginie &amp; Sven — Confirmation de présence</title>
+  <meta name="description" content="Confirmez votre présence au mariage de Virginie et Sven, le 17 octobre 2026 au Château Le Passage.">
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+    }
+    .page-wrapper {
+      width: 100%;
+      position: relative;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body class="bg-chateau">
+
+  <div class="page-wrapper">
+    <div class="card">
+
+      <!-- En-tête -->
+      <header class="wedding-header">
+        <span class="ornament">— vous êtes invité(e) —</span>
+        <h1><em>Virginie</em> &amp; <em>Sven</em></h1>
+        <div class="divider">❧</div>
+        <p class="date-lieu">17 Octobre 2026 &nbsp;·&nbsp; Château Le Passage</p>
+      </header>
+
+      <!-- Message de confirmation (caché par défaut) -->
+      <div class="confirmation" id="confirmationMsg">
+        <div class="check-icon">✦</div>
+        <h2>Merci pour votre réponse !</h2>
+        <p>
+          Nous avons bien reçu votre confirmation.<br>
+          Nous avons hâte de partager cette magnifique journée avec vous.<br><br>
+          <em style="color: var(--gold);">Virginie &amp; Sven</em>
+        </p>
+      </div>
+
+      <!-- Formulaire RSVP -->
+      <form id="rsvpForm" novalidate>
+
+        <div class="form-error-banner" id="errorBanner">
+          Une erreur est survenue. Veuillez vérifier vos informations et réessayer.
+        </div>
+
+        <!-- Section 1 : Identité -->
+        <div class="form-section">
+          <p class="form-section-title">Vos coordonnées</p>
+
+          <div class="form-group">
+            <label for="nom_prenom">Nom et Prénom <span class="required">*</span></label>
+            <input type="text" id="nom_prenom" name="nom_prenom" placeholder="ex. Martin Dupont" autocomplete="name">
+            <p class="field-error" id="err-nom">Veuillez indiquer votre nom et prénom.</p>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Adresse email <span class="required">*</span></label>
+            <input type="email" id="email" name="email" placeholder="ex. martin@email.com" autocomplete="email">
+            <p class="field-error" id="err-email">Veuillez indiquer une adresse email valide.</p>
+          </div>
+
+          <div class="form-group">
+            <label for="telephone">Numéro de téléphone <span class="required">*</span></label>
+            <input type="tel" id="telephone" name="telephone" placeholder="ex. 06 12 34 56 78" autocomplete="tel">
+            <p class="field-error" id="err-tel">Veuillez indiquer votre numéro de téléphone.</p>
+          </div>
+        </div>
+
+        <!-- Section 2 : Présence -->
+        <div class="form-section">
+          <p class="form-section-title">Votre présence</p>
+
+          <div class="form-group">
+            <label>Serez-vous présent(e) le 17 octobre 2026 ? <span class="required">*</span></label>
+            <div class="radio-group inline" id="presenceGroup">
+              <label class="radio-option" data-value="oui">
+                <input type="radio" name="presence" value="oui">
+                <span class="radio-dot"></span>
+                <span>Oui, avec grand plaisir ✨</span>
+              </label>
+              <label class="radio-option" data-value="non">
+                <input type="radio" name="presence" value="non">
+                <span class="radio-dot"></span>
+                <span>Non, malheureusement</span>
+              </label>
+            </div>
+            <p class="field-error" id="err-presence">Veuillez indiquer si vous serez présent(e).</p>
+          </div>
+        </div>
+
+        <!-- Section 3 : Détails (conditionnelle — visible si Oui) -->
+        <div id="detailsSection" class="conditional-field hidden">
+          <div class="form-section">
+            <p class="form-section-title">Organisation de votre venue</p>
+            <p style="font-size:0.85rem; color:var(--text-light); margin-bottom:18px;">
+              Merci de compléter les informations ci-dessous pour nous aider à organiser au mieux cette journée.
+            </p>
+
+            <div class="form-group">
+              <label for="nombre_personnes">Nombre de personnes (vous inclus) <span class="required">*</span></label>
+              <select id="nombre_personnes" name="nombre_personnes">
+                <option value="">— Sélectionnez —</option>
+                <option value="1">1 personne</option>
+                <option value="2">2 personnes</option>
+                <option value="3">3 personnes</option>
+                <option value="4">4 personnes</option>
+              </select>
+              <p class="field-error" id="err-nombre">Veuillez indiquer le nombre de personnes.</p>
+            </div>
+
+            <div class="form-group conditional-field hidden" id="accompagnantField">
+              <label for="nom_accompagnant">Nom de votre accompagnant(e)</label>
+              <input type="text" id="nom_accompagnant" name="nom_accompagnant" placeholder="ex. Claire Dupont">
+            </div>
+
+            <div class="form-group">
+              <label>À quels moments serez-vous présent(e) ? <span class="required">*</span></label>
+              <div class="checkbox-group" id="momentsGroup">
+                <label class="checkbox-option" data-value="ceremonie">
+                  <input type="checkbox" name="moments" value="ceremonie">
+                  <span class="checkbox-box"></span>
+                  <span>💒 Cérémonie</span>
+                </label>
+                <label class="checkbox-option" data-value="cocktail">
+                  <input type="checkbox" name="moments" value="cocktail">
+                  <span class="checkbox-box"></span>
+                  <span>🥂 Cocktail</span>
+                </label>
+                <label class="checkbox-option" data-value="diner">
+                  <input type="checkbox" name="moments" value="diner">
+                  <span class="checkbox-box"></span>
+                  <span>🍽️ Dîner</span>
+                </label>
+                <label class="checkbox-option" data-value="soiree">
+                  <input type="checkbox" name="moments" value="soiree">
+                  <span class="checkbox-box"></span>
+                  <span>🎶 Soirée dansante</span>
+                </label>
+              </div>
+              <p class="field-error" id="err-moments">Veuillez sélectionner au moins un moment.</p>
+            </div>
+
+            <div class="form-group">
+              <label>Aurez-vous besoin d'un hébergement ? <span class="required">*</span></label>
+              <div class="radio-group inline" id="hebergementGroup">
+                <label class="radio-option" data-value="oui">
+                  <input type="radio" name="hebergement" value="oui">
+                  <span class="radio-dot"></span>
+                  <span>Oui</span>
+                </label>
+                <label class="radio-option" data-value="non">
+                  <input type="radio" name="hebergement" value="non">
+                  <span class="radio-dot"></span>
+                  <span>Non</span>
+                </label>
+              </div>
+              <p class="field-error" id="err-heberg">Veuillez indiquer si vous avez besoin d'hébergement.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 4 : Message -->
+        <div class="form-section">
+          <p class="form-section-title">Un mot pour les mariés</p>
+          <div class="form-group">
+            <label for="message">Message personnel <span style="font-size:0.75rem;font-weight:300;">(optionnel)</span></label>
+            <textarea id="message" name="message" placeholder="Partagez un mot, une anecdote, vos meilleurs vœux…" rows="4"></textarea>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary" id="submitBtn">
+          Envoyer ma réponse
+        </button>
+
+      </form>
+
+    </div>
+
+    <!-- Lien discret vers le dashboard -->
+    <p style="text-align:center; margin-top:20px; position:relative; z-index:1;">
+      <a href="dashboard.html" style="font-size:0.75rem; color:rgba(255,255,255,0.5); text-decoration:none; letter-spacing:0.1em;">
+        ⚙ Dashboard
+      </a>
+    </p>
+  </div>
+
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+  <script>
+    // ============================================================
+    // CONFIGURATION SUPABASE — remplacer par vos vraies valeurs
+    // ============================================================
+    const SUPABASE_URL  = 'https://evgmjelghhatcumtccoz.supabase.co';
+    const SUPABASE_ANON = 'sb_publishable_ZyM0wOP4hn61DpK7kwTLgQ_0cmJn-My';
+    // ============================================================
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    /* ---- Helpers radio/checkbox custom ---- */
+    function initRadioGroup(groupId) {
+      const group = document.getElementById(groupId);
+      if (!group) return;
+      group.querySelectorAll('.radio-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+          group.querySelectorAll('.radio-option').forEach(o => o.classList.remove('selected'));
+          opt.classList.add('selected');
+          opt.querySelector('input').checked = true;
+          opt.querySelector('input').dispatchEvent(new Event('change', { bubbles: true }));
+        });
+      });
+    }
+
+    function initCheckboxGroup(groupId) {
+      const group = document.getElementById(groupId);
+      if (!group) return;
+      group.querySelectorAll('.checkbox-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+          const inp = opt.querySelector('input');
+          inp.checked = !inp.checked;
+          opt.classList.toggle('selected', inp.checked);
+        });
+      });
+    }
+
+    initRadioGroup('presenceGroup');
+    initRadioGroup('hebergementGroup');
+    initCheckboxGroup('momentsGroup');
+
+    /* ---- Affichage conditionnel ---- */
+    const detailsSection   = document.getElementById('detailsSection');
+    const accompagnantField = document.getElementById('accompagnantField');
+    const nombreSelect      = document.getElementById('nombre_personnes');
+
+    document.querySelectorAll('input[name="presence"]').forEach(inp => {
+      inp.addEventListener('change', () => {
+        if (inp.value === 'oui') {
+          detailsSection.classList.remove('hidden');
+          detailsSection.classList.add('visible');
+        } else {
+          detailsSection.classList.remove('visible');
+          detailsSection.classList.add('hidden');
+        }
+      });
+    });
+
+    nombreSelect.addEventListener('change', () => {
+      const n = parseInt(nombreSelect.value);
+      if (n >= 2) {
+        accompagnantField.classList.remove('hidden');
+        accompagnantField.classList.add('visible');
+      } else {
+        accompagnantField.classList.remove('visible');
+        accompagnantField.classList.add('hidden');
+      }
+    });
+
+    /* ---- Validation ---- */
+    function showError(id, show) {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('visible', show);
+    }
+
+    function getCheckedMoments() {
+      return Array.from(document.querySelectorAll('input[name="moments"]:checked')).map(i => i.value);
+    }
+
+    function validate() {
+      let valid = true;
+
+      const nom = document.getElementById('nom_prenom').value.trim();
+      showError('err-nom', !nom);
+      if (!nom) valid = false;
+
+      const email = document.getElementById('email').value.trim();
+      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      showError('err-email', !emailOk);
+      if (!emailOk) valid = false;
+
+      const tel = document.getElementById('telephone').value.trim();
+      showError('err-tel', tel.length < 8);
+      if (tel.length < 8) valid = false;
+
+      const presence = document.querySelector('input[name="presence"]:checked');
+      showError('err-presence', !presence);
+      if (!presence) valid = false;
+
+      if (presence && presence.value === 'oui') {
+        const nombre = nombreSelect.value;
+        showError('err-nombre', !nombre);
+        if (!nombre) valid = false;
+
+        const moments = getCheckedMoments();
+        showError('err-moments', moments.length === 0);
+        if (moments.length === 0) valid = false;
+
+        const heberg = document.querySelector('input[name="hebergement"]:checked');
+        showError('err-heberg', !heberg);
+        if (!heberg) valid = false;
+      }
+
+      return valid;
+    }
+
+    /* ---- Soumission ---- */
+    const form      = document.getElementById('rsvpForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorBanner = document.getElementById('errorBanner');
+    const confirmMsg  = document.getElementById('confirmationMsg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorBanner.classList.remove('visible');
+
+      if (!validate()) return;
+
+      const presenceVal = document.querySelector('input[name="presence"]:checked').value;
+      const isPresent   = presenceVal === 'oui';
+      const hebergVal   = document.querySelector('input[name="hebergement"]:checked');
+
+      const payload = {
+        nom_prenom:       document.getElementById('nom_prenom').value.trim(),
+        email:            document.getElementById('email').value.trim().toLowerCase(),
+        telephone:        document.getElementById('telephone').value.trim(),
+        presence:         isPresent,
+        nombre_personnes: isPresent ? parseInt(nombreSelect.value) : null,
+        nom_accompagnant: isPresent ? (document.getElementById('nom_accompagnant').value.trim() || null) : null,
+        moments:          isPresent ? getCheckedMoments() : [],
+        hebergement:      isPresent && hebergVal ? (hebergVal.value === 'oui') : null,
+        message:          document.getElementById('message').value.trim() || null,
+      };
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="loader"></span> Envoi en cours…';
+
+      try {
+        const { error } = await supabase.from('rsvp').insert([payload]);
+
+        if (error) {
+          console.error('Supabase error:', error);
+          if (error.code === '23505') {
+            errorBanner.textContent = 'Cette adresse email a déjà été utilisée pour répondre.';
+          } else {
+            errorBanner.textContent = 'Une erreur est survenue. Veuillez réessayer dans quelques instants.';
+          }
+          errorBanner.classList.add('visible');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Envoyer ma réponse';
+        } else {
+          form.classList.add('hidden');
+          form.style.display = 'none';
+          confirmMsg.classList.add('visible');
+        }
+      } catch (err) {
+        console.error('Network error:', err);
+        errorBanner.textContent = 'Erreur réseau. Vérifiez votre connexion et réessayez.';
+        errorBanner.classList.add('visible');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Envoyer ma réponse';
+      }
+    });
+  </script>
+
+</body>
+</html>
